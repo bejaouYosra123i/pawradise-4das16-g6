@@ -1,0 +1,15 @@
+﻿services:
+  postgres:
+    image: postgres:16
+    container_name: animalrescue-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: animalrescue_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - animalrescue_data:/var/lib/postgresql/data
+
+volumes:
+  animalrescue_data:
