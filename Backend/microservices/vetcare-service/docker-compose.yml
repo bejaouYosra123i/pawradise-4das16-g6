@@ -1,0 +1,15 @@
+services:
+  vetcare-db:
+    image: postgres:16
+    container_name: vetcare-db
+    environment:
+      POSTGRES_DB: vetcare_db
+      POSTGRES_USER: vetcare
+      POSTGRES_PASSWORD: vetcare
+    ports:
+      - "5439:5432"
+    volumes:
+      - vetcare-data:/var/lib/postgresql/data
+
+volumes:
+  vetcare-data:

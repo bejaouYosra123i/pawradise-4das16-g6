@@ -1,0 +1,15 @@
+services:
+  adoption-db:
+    image: postgres:16
+    container_name: adoption-db
+    environment:
+      POSTGRES_DB: adoption_db
+      POSTGRES_USER: adoption
+      POSTGRES_PASSWORD: adoption
+    ports:
+      - "5438:5432"
+    volumes:
+      - adoption-data:/var/lib/postgresql/data
+
+volumes:
+  adoption-data:
