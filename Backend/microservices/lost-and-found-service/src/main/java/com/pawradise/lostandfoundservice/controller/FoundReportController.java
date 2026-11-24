@@ -38,6 +38,12 @@ public class FoundReportController {
         return service.update(id, report);
     }
 
+    // POST /api/found-reports/{id}/rescue -> 200, 404, 409 (not injured / already requested)
+    @PostMapping("/{id}/rescue")
+    public FoundReport requestRescue(@PathVariable Long id) {
+        return service.requestRescue(id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

@@ -3,8 +3,7 @@ package com.pawradise.lostandfoundservice.service;
 import com.pawradise.lostandfoundservice.entity.LostReport;
 import com.pawradise.lostandfoundservice.exception.NotFoundException;
 import com.pawradise.lostandfoundservice.repository.LostReportRepository;
-import com.pawradise.lostandfoundservice.repository.OwnershipClaimRepository;
-import com.pawradise.lostandfoundservice.repository.SightingRepository;
+import com.pawradise.lostandfoundservice.util.Coordinates;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,23 +13,20 @@ import java.util.List;
 public class LostReportService {
 
     private final LostReportRepository repository;
-    private final SightingRepository sightingRepository;
-    private final OwnershipClaimRepository claimRepository;
+    private final ReportCleanup cleanup;
 
-    public LostReportService(LostReportRepository repository,
-                             SightingRepository sightingRepository,
-                             OwnershipClaimRepository claimRepository) {
+    public LostReportService(LostReportRepository repository, ReportCleanup cleanup) {
         this.repository = repository;
-        this.sightingRepository = sightingRepository;
-        this.claimRepository = claimRepository;
+        this.cleanup = cleanup;
     }
 
     @Transactional
     public LostReport create(LostReport report) {
-        if (report.getAnimalType() == null || report.getAnimalType().isBlank()) {
-            throw new IllegalArgumentException("animalType is required");
-        }
-        report.setId(null); // never trust an id sent by the client on creation
+        validate(report);
+        report.setId(null);        // never trust an id sent by the client on creation
+        report.setStatus(null);    // always starts OPEN (see Report.onCreate)
+        report.setOpenedAt(null);
+        report.setClosedAt(null);
         return repository.save(report);
     }
 
@@ -48,6 +44,7 @@ public class LostReportService {
     @Transactional
     public LostReport update(Long id, LostReport data) {
         LostReport existing = findById(id);
+        validate(data);
         existing.setPetName(data.getPetName());
         existing.setLostDate(data.getLostDate());
         existing.setAnimalType(data.getAnimalType());
@@ -66,8 +63,14 @@ public class LostReportService {
     @Transactional
     public void delete(Long id) {
         LostReport report = findById(id);
-        sightingRepository.deleteByReportId(id);
-        claimRepository.deleteByReportId(id);
+        cleanup.deleteChildrenOf(id);
         repository.delete(report);
+    }
+
+    private void validate(LostReport report) {
+        if (report.getAnimalType() == null || report.getAnimalType().isBlank()) {
+            throw new IllegalArgumentException("animalType is required");
+        }
+        Coordinates.validate(report.getLatitude(), report.getLongitude());
     }
 }
