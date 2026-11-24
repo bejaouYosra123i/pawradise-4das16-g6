@@ -3,14 +3,18 @@ package tn.esprit.adoption.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class Candidature {
 
     @Id
@@ -26,6 +30,7 @@ public class Candidature {
     private LocalDate dateDepot;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatutCandidature statut = StatutCandidature.EN_ATTENTE;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -33,12 +38,25 @@ public class Candidature {
     @JsonIgnore
     private AnnonceAdoption annonce;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "candidature", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Evaluation> evaluations = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "candidature", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rencontre> rencontres = new ArrayList<>();
 
+    @JsonIgnore
     @OneToOne(mappedBy = "candidature", cascade = CascadeType.ALL, orphanRemoval = true)
     private ContratAdoption contrat;
+
+    @PrePersist
+    void prePersist() {
+        if (statut == null) {
+            statut = StatutCandidature.EN_ATTENTE;
+        }
+        if (dateDepot == null) {
+            dateDepot = LocalDate.now();
+        }
+    }
 }
