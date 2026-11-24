@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const { registerWithEureka } = require('./eureka');
+const registerRoutes = require('./routes');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 app.use(cors());
@@ -15,6 +17,9 @@ app.get('/health', (req, res) => {
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
+
+registerRoutes(app);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 8086;
 
