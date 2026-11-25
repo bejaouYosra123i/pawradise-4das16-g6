@@ -1,6 +1,7 @@
 package tn.esprit.adoption.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,12 +9,16 @@ import org.springframework.web.server.ResponseStatusException;
 import tn.esprit.adoption.entity.AnnonceAdoption;
 import tn.esprit.adoption.entity.Candidature;
 import tn.esprit.adoption.entity.StatutCandidature;
+import tn.esprit.adoption.event.AdoptionCompletedEvent;
+import tn.esprit.adoption.event.AdoptionEventPublisher;
 import tn.esprit.adoption.exception.ResourceNotFoundException;
 import tn.esprit.adoption.repository.AnnonceAdoptionRepository;
 import tn.esprit.adoption.repository.CandidatureRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -21,12 +26,17 @@ public class CandidatureService {
 
     private final CandidatureRepository repository;
     private final AnnonceAdoptionRepository annonceRepository;
+    private final AdoptionEventPublisher eventPublisher;
 
     public Candidature create(Long annonceId, Candidature data) {
         AnnonceAdoption annonce = annonceRepository.findById(annonceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Annonce introuvable : " + annonceId));
+        if (!annonce.isDisponible()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Annonce non disponible");
+        }
         data.setId(null);
         data.setAnnonce(annonce);
+        data.setDateDepot(LocalDate.now());
         data.setStatut(StatutCandidature.EN_ATTENTE);
         return repository.save(data);
     }
@@ -79,7 +89,27 @@ public class CandidatureService {
         }
 
         c.setStatut(nouveau);
-        return repository.save(c);
+        Candidature saved = repository.save(c);
+
+        if (nouveau == StatutCandidature.APPROUVEE) {
+            AnnonceAdoption annonce = saved.getAnnonce();
+            annonce.setDisponible(false);
+            annonceRepository.save(annonce);
+
+            try {
+                eventPublisher.publishAdoptionCompleted(new AdoptionCompletedEvent(
+                        annonce.getId(),
+                        saved.getId(),
+                        annonce.getIdAnimal(),
+                        annonce.getIdRefuge(),
+                        saved.getIdCandidat(),
+                        LocalDate.now()
+                ));
+            } catch (Exception e) {
+                log.error("Échec de publication de AdoptionCompleted : {}", e.getMessage());
+            }
+        }
+        return saved;
     }
 
     public void delete(Long id) {

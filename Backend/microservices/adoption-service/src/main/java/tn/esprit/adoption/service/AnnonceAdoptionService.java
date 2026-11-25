@@ -46,9 +46,7 @@ public class AnnonceAdoptionService {
         existing.setIdAnimal(data.getIdAnimal());
         existing.setIdRefuge(data.getIdRefuge());
         existing.setDescription(data.getDescription());
-        if (data.getDisponible() != null) {
-            existing.setDisponible(data.getDisponible());
-        }
+        existing.setDisponible(data.isDisponible());
         return repository.save(existing);
     }
 
