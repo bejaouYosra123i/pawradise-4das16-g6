@@ -68,7 +68,7 @@ des différents microservices de la plateforme Pawradise.
 Tous les microservices sont enregistrés et affichent
 un statut UP.
 
-![Eureka Dashboard](Documentation/Images/eureka-dashboard.png)
+![Eureka Dashboard](Documentation/Capture d'écran 2026-11-26 144831.png)
 
 ### Principes de conception
 
