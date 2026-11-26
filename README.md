@@ -60,6 +60,15 @@ Le tout orchestré par Docker Compose
 ```
 
 > Les schémas détaillés se trouvent dans [`Documentation/Diagrams`](./Documentation/Diagrams).
+> ## 📸 Eureka Dashboard
+
+Le serveur Eureka permet la découverte et l'enregistrement
+des différents microservices de la plateforme Pawradise.
+
+Tous les microservices sont enregistrés et affichent
+un statut UP.
+
+![Eureka Dashboard](Documentation/Images/eureka-dashboard.png)
 
 ### Principes de conception
 
