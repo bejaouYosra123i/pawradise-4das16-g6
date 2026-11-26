@@ -1,15 +1,16 @@
 services:
 
-  mysql:
-    image: mysql:8.0
-    container_name: lostfound-mysql
+  postgres:
+    image: postgres:16
+    container_name: lostfound-postgres
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: lostfound_db
+      POSTGRES_DB: lostfound_db
+      POSTGRES_USER: lostfound
+      POSTGRES_PASSWORD: lostfound
     ports:
-      - "3309:3306"
+      - "5440:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  mysql_data:
+  postgres_data:
