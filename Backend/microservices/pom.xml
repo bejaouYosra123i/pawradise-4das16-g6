@@ -28,7 +28,8 @@
     <module>animal-rescue-service</module>
     <module>adoption-service</module>
     <module>marketplace-service</module>
-      <module>vetcare-service</module>
+    <module>vetcare-service</module>
+    <module>api-gateway</module>
   </modules>
 
   <dependencyManagement>

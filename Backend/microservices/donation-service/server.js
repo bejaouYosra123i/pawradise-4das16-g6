@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const { registerWithEureka } = require('./eureka');
 const registerRoutes = require('./routes');
+const registerDocs = require('./docs');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -19,6 +20,7 @@ app.get('/health', (req, res) => {
 });
 
 registerRoutes(app);
+registerDocs(app);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 8086;
